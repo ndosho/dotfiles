@@ -1,6 +1,6 @@
 ignore-empty-password
 disable-caps-lock-text
-image=$HOME/pictures/wallpapers/cp.png
+image=$HOME/Pictures/wallpapers/cp.png
 font=Calvin and Hobbes
 
 text-ver-color=00000000
