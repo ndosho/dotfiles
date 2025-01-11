@@ -1,6 +1,7 @@
 # This file contains fish universal variable definitions.
 # VERSION: 3.0
 SETUVAR --export EDITOR:nvim
+SETUVAR --export PYDEVD_DISABLE_FILE_VALIDATION:1
 SETUVAR --export XDG_CURRENT_DESKTOP:sway
 SETUVAR __fish_initialized:3400
 SETUVAR fish_color_autosuggestion:brblack
