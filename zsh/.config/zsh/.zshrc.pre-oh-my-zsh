@@ -1,0 +1,129 @@
+export ZSH="$ZDOTDIR/ohmyzsh"
+
+ZSH_THEME="robbyrussell"
+
+# Uncomment one of the following lines to change the auto-update behavior
+zstyle ':omz:update' mode auto      # update automatically without asking
+# zstyle ':omz:update' mode reminder  # just remind me to update when it's time
+
+# Uncomment the following line to change how often to auto-update (in days).
+zstyle ':omz:update' frequency 13
+
+# Uncomment the following line if you want to disable marking untracked files
+# under VCS as dirty. This makes repository status check for large repositories
+# much, much faster.
+# DISABLE_UNTRACKED_FILES_DIRTY="true"
+
+# Uncomment the following line if you want to change the command execution time
+# stamp shown in the history command output.
+# You can set one of the optional three formats:
+# "mm/dd/yyyy"|"dd.mm.yyyy"|"yyyy-mm-dd"
+# or set a custom format using the strftime function format specifications,
+# see 'man strftime' for details.
+HIST_STAMPS="mm/dd/yyyy"
+
+plugins=(git history-substring-search zsh-syntax-highlighting)
+
+source $ZSH/oh-my-zsh.sh
+
+
+# User configuration
+
+# export MANPATH="/usr/local/man:$MANPATH"
+
+# You may need to manually set your language environment
+# export LANG=en_US.UTF-8
+
+# Preferred editor for local and remote sessions
+# if [[ -n $SSH_CONNECTION ]]; then
+#   export EDITOR='vim'
+# else
+#   export EDITOR='nvim'
+# fi
+
+# Compilation flags
+# export ARCHFLAGS="-arch $(uname -m)"
+
+# Set personal aliases, overriding those provided by Oh My Zsh libs,
+# plugins, and themes. Aliases can be placed here, though Oh My Zsh
+# users are encouraged to define aliases within a top-level file in
+# the $ZSH_CUSTOM folder, with .zsh extension. Examples:
+# - $ZSH_CUSTOM/aliases.zsh
+# - $ZSH_CUSTOM/macos.zsh
+# For a full list of active aliases, run `alias`.
+#
+# Example aliases
+# alias zshconfig="mate ~/.zshrc"
+# alias ohmyzsh="mate ~/.oh-my-zsh"
+
+path+=/home/ns/homemanager/result/bin
+export PATH
+setopt autocd
+setopt extended_glob
+setopt SHARE_HISTORY
+setopt HIST_IGNORE_DUPS
+setopt HIST_IGNORE_SPACE
+HISTFILE=/home/ns/.config/zsh/.zsh_history
+HISTSIZE=10000
+SAVEHIST=1000
+source <(fzf --zsh)
+typeset -A abbreviations
+abbreviations=(
+  "gco" "git checkout"
+  "gst" "git status"
+  "ga" "git add"
+  "gc" "git commit"
+  "gd" "git diff"
+  "instal" "doas dnf install"
+  "serv" "doas systemctl"
+  "dock" "doas docker"
+  "remove" "doas dnf remove"
+  "upg" "doas dnf update && doas dnf upgrade"
+  "em" "emacsclient -t"
+  "emm" "emacsclient -c"
+  )
+
+expand-abbreviation() {
+  local abbrev=${BUFFER}
+  local expansion=${abbreviations[$abbrev]}
+
+  if [[ -n $expansion ]]; then
+    BUFFER=$expansion
+    CURSOR=${#BUFFER}
+  else 
+    BUFFER+=" "
+  fi 
+  zle reset-prompt
+}
+
+autoload -U expand-abbreviation
+zle -N expand-abbreviation
+bindkey '^ ' expand-abbreviation
+bindkey -M emacs '^P' history-substring-search-up
+bindkey -M emacs '^N' history-substring-search-down
+
+man() {
+  if command -v fzf > /dev/null 2>&1
+  then
+    local page=$(command man -k . | fzf --prompt='Man> ' | awk '{print $1}')
+    if [[ -n $page ]]
+    then 
+      nvim +"Man $page | only"
+    fi 
+  else 
+    nvim +"Man $1 | only"
+  fi
+}
+
+function ff() {
+  local selected_files
+  selected_files=$(fzf -m --preview="bat --style=numbers --line-range :500 --color=always {}")
+  if [[ -n $selected_files ]]; then 
+    nvim $selected_files
+  fi 
+}
+
+function pkill {
+  ps aux | fzf --height 40% --layout=reverse --prompt="Select process to kill: " | awk '{print $2}' | xargs -r sudo kill
+}
+
